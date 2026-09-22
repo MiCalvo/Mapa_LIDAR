@@ -1,0 +1,10 @@
+node_modules/
+dist/
+tmp/
+*.log
+# Datos locales: zonas, LAZ descargados, catálogos y ortofotos en caché (nunca se suben)
+data/*
+!data/README.md
+
+# Carpeta de la app Claude (no es parte del proyecto)
+Claude outputs/

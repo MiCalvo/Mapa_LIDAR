@@ -1,0 +1,4 @@
+# Conversor LAZ/LAS -> COPC (tools/lidar2copc.py)
+numpy>=1.24
+laspy[lazrs]>=2.5
+copclib>=2.6

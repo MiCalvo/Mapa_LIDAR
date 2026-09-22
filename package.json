@@ -1,0 +1,34 @@
+{
+  "name": "mapa-lidar",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "description": "Visor local de terreno LiDAR (MDT/MDS sombreado, curvas de nivel, ortofoto y nube de puntos COPC) con mapa de selección y descarga de bloques PNOA",
+  "license": "MIT",
+  "keywords": [
+    "lidar",
+    "pnoa",
+    "copc",
+    "mdt",
+    "dem",
+    "hillshade",
+    "three.js",
+    "spain",
+    "utm"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "copc": "^0.0.9",
+    "laz-perf": "^0.0.7",
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "vite": "^6.4.3"
+  }
+}

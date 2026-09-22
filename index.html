@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mapa LiDAR</title>
+    <link rel="icon" type="image/png" href="/icono-64.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/estilos.css" />
+  </head>
+  <body data-vista="terreno" data-modo="mapa" data-superficie="mdt">
+    <canvas id="lienzo" aria-label="Vista 3D del terreno"></canvas>
+    <canvas id="mapa" aria-label="Mapa de selección de bloques" hidden></canvas>
+
+    <header class="marca vidrio">
+      <img src="/icono-128.png" alt="" />
+      <div><b>Mapa LiDAR</b><small>Terreno y nubes de puntos</small></div>
+    </header>
+
+    <nav class="herramientas vidrio" aria-label="Cámara">
+      <button id="btn-modo" class="modo" title="Cambiar entre el mapa de selección y la vista 3D">Mapa</button>
+      <span class="sep"></span>
+      <button id="btn-acercar" title="Acercar (mantén pulsado)">+</button>
+      <button id="btn-alejar" title="Alejar (mantén pulsado)">&#x2212;</button>
+      <span class="sep solo-3d"></span>
+      <button id="btn-girar-izq" class="solo-3d" title="Girar a la izquierda">&#x21BA;</button>
+      <button id="btn-girar-der" class="solo-3d" title="Girar a la derecha">&#x21BB;</button>
+      <button id="btn-subir" class="solo-3d" title="Ver más desde arriba">&#x25B2;</button>
+      <button id="btn-bajar" class="solo-3d" title="Ver más de lado">&#x25BC;</button>
+      <span class="sep solo-3d"></span>
+      <button id="btn-encuadrar" class="solo-3d" title="Encuadrar la zona">&#x2922;</button>
+      <span class="sep"></span>
+      <button id="btn-foto" title="Modo foto: ocultar la interfaz para una captura (Esc para salir)" aria-label="Modo foto">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </nav>
+
+    <aside class="panel vidrio izq" aria-label="Bloques">
+      <div class="cab"><b>Bloques</b></div>
+      <div class="seg pest">
+        <button data-pest="sel" class="a">Selección <span id="n-sel" class="cnt">0</span></button>
+        <button data-pest="todo">Todo el PC <span id="total-bloques" class="cnt">0</span></button>
+      </div>
+      <div id="lista-seleccion" class="cuerpo"></div>
+      <div id="lista-zonas" class="cuerpo" hidden></div>
+    </aside>
+
+    <aside class="panel vidrio der" aria-label="Visualización">
+      <div class="cab"><b>Visualización</b></div>
+      <div class="cuerpo">
+        <div class="ctl"><label>Vista</label>
+          <div class="seg" data-seg="vista">
+            <button data-valor="terreno" class="a">Terreno</button>
+            <button data-valor="puntos">Puntos</button>
+          </div>
+        </div>
+
+        <div class="solo-terreno">
+          <div class="ctl"><label>Superficie</label>
+            <div class="seg" data-seg="superficie">
+              <button data-valor="mdt" class="a" title="Modelo del terreno: suelo desnudo">Suelo</button>
+              <button data-valor="mds" title="Modelo de superficie: con árboles y edificios">Con objetos</button>
+            </div>
+          </div>
+          <div class="ctl"><label>Color</label>
+            <div class="seg" data-seg="colorTerreno">
+              <button data-valor="0" class="a">Altura</button>
+              <button data-valor="1">Pendiente</button>
+              <button data-valor="2">Gris</button>
+              <button data-valor="3" title="Ortofoto PNOA del IGN sobre el relieve">Foto</button>
+            </div>
+          </div>
+          <div class="ctl"><label>Relieve ×</label>
+            <input id="exag" type="range" min="1" max="5" step="0.25" value="1" />
+            <input id="exag-v" class="num" type="number" min="0.1" max="200" step="any" value="1" title="Escribe cualquier valor (p. ej. 32)" />
+          </div>
+          <div class="ctl solo-mds"><label title="Exageración de árboles y edificios (altura sobre el suelo)">Objetos ×</label>
+            <input id="exag-obj" type="range" min="0" max="5" step="0.25" value="1" />
+            <input id="exag-obj-v" class="num" type="number" min="0" max="200" step="any" value="1" title="Escribe cualquier valor" />
+          </div>
+          <div class="ctl"><label>Luz</label>
+            <input id="luz" type="range" min="0" max="355" step="5" value="315" />
+            <span id="luz-v" class="v">NO</span>
+          </div>
+          <div class="grp">Curvas de nivel</div>
+          <div class="ctl"><label class="casilla"><input id="iso" type="checkbox" checked /> Mostrar</label></div>
+          <div id="curvas" class="curvas"></div>
+          <p class="nota">«cada» = una curva cada N metros; «cota» = una sola curva a esa altura. Las de abajo se dibujan encima.</p>
+        </div>
+
+        <div class="solo-puntos">
+          <div class="ctl"><label>Color</label>
+            <div class="seg" data-seg="modoColor">
+              <button data-valor="rgb" class="a">Real</button>
+              <button data-valor="clase">Clase</button>
+              <button data-valor="altura">Altura</button>
+              <button data-valor="intensidad">Intens.</button>
+            </div>
+          </div>
+          <div class="ctl"><label>Calidad</label>
+            <div class="seg" data-seg="calidad">
+              <button data-valor="alta">Alta</button>
+              <button data-valor="media" class="a">Media</button>
+              <button data-valor="baja">Baja</button>
+            </div>
+          </div>
+          <div class="ctl"><label>Punto</label>
+            <input id="tamano" type="range" min="0.5" max="4" step="0.25" value="1.5" />
+            <span id="tamano-v" class="v">1.5</span>
+          </div>
+          <div class="ctl"><label>Presupuesto</label>
+            <input id="presupuesto" type="range" min="1" max="20" step="1" value="6" />
+            <span id="presupuesto-v" class="v">6 M</span>
+          </div>
+          <div class="grp">Clases</div>
+          <div id="clases" class="clases"></div>
+        </div>
+      </div>
+    </aside>
+
+    <aside id="panel-mapa" class="panel vidrio der mapa" aria-label="Elegir zona" hidden></aside>
+    <div id="aviso" class="aviso-flot vidrio" hidden></div>
+    <div id="escala" class="escala vidrio" hidden></div>
+    <section id="editor-escala" class="editor-escala vidrio" hidden></section>
+    <section id="dialogo-foto" class="dialogo-foto vidrio" hidden></section>
+    <button id="brujula" class="brujula vidrio" type="button" aria-label="Brújula: orientar al norte"></button>
+
+    <footer class="tele vidrio" id="telemetria">Sin bloques cargados</footer>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
