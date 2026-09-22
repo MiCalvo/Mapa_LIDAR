@@ -13,21 +13,77 @@ escala de color editable u ortofoto encima. Todo corre en tu ordenador: no hay s
 > Estado: **v0.3, experimental.** Se ha usado sobre todo en Windows. Algunas partes (ortofoto con el WMS real
 > del IGN, descarga de geoEuskadi) se han probado poco; ver [Limitaciones](#limitaciones).
 
-## Funciones
+> **¿Quieres usarlo en tu país o región?** Ver [Adáptalo a tu región](#adáptalo-a-tu-región).
 
-- **Mapa de selección** (OpenStreetMap) con cuadrícula UTM jerárquica: península → celdas de 100 km →
-  10 km → bloques de 2 km. Cada bloque indica su estado: listo, parcial, descargado sin procesar,
-  disponible para descargar, sin enlace directo o sin datos.
-- **Búsqueda de localidades** (Nominatim), selección por rectángulo con tabla de bloques y bloques de celdas
-  vecinas.
-- **Descarga y procesado automáticos** donde hay enlace directo público (Castilla y León, geoEuskadi). Para el
-  resto, ayuda paso a paso con el Centro de Descargas del CNIG; los LAZ que dejes en *Descargas* se detectan.
-- **Vista 3D del terreno**: MDT (suelo) o MDS (con edificios y vegetación), sombreado por píxel, color por
-  altura, pendiente, gris u **ortofoto PNOA**, exageración vertical libre (y aparte para objetos), costuras
-  entre bloques sin saltos.
-- **Curvas de nivel** configurables (equidistancia o cota concreta, color, grosor, patrón).
-- Brújula, barra de escala de color editable (doble clic) y **modo foto** (oculta la interfaz y exporta PNG).
-- Vista de **nube de puntos** COPC con carga bajo demanda y filtro por clases.
+## Qué puede hacer
+
+### 1. Mapa de selección
+
+La app abre en un mapa de OpenStreetMap con la cuadrícula UTM oficial de los bloques LiDAR. Se baja por niveles,
+como capas: **Península** (husos y cuadrados de 100 km) → **100 km** (celdas de 10 km) → **10 km** (bloques de
+2×2 km) → **3D** (terreno de los bloques elegidos). Las flechas del selector de niveles suben y bajan, y el zoom
+entre niveles es animado.
+
+| Península y celdas | Bloques de 2 km |
+| --- | --- |
+| ![Nivel Península](docs/mapa-peninsula.jpg) | ![Nivel de bloques](docs/mapa-bloques.jpg) |
+
+- **Estado de cada bloque** con colores: terreno listo, parcial, descargado sin procesar, se puede descargar,
+  en catálogo pero sin enlace disponible, o sin descarga automática.
+- **Búsqueda de localidades y parajes** (Nominatim): centra el mapa y marca el punto.
+- **Celdas vecinas**: en el nivel de 10 km se ven también los bloques de alrededor (en gris) y se pueden elegir;
+  unas flechas en los bordes saltan a la celda contigua.
+- **Selección por área**: se dibuja un rectángulo y aparece una tabla con todos los bloques de dentro, su estado y
+  qué hacer con cada uno (descargar, procesar, ver en 3D o cómo conseguirlo).
+- **Descarga y procesado automáticos** donde hay enlace directo público (Castilla y León y geoEuskadi): la app
+  descarga los LAZ, los convierte en terreno con Python y los deja listos. Hay una cola de trabajos con progreso.
+- **Resto de España**: para cada bloque, una ayuda con el enlace al Centro de Descargas del CNIG, las coordenadas
+  para buscarlo y los pasos. Los LAZ que dejes en tu carpeta *Descargas* se detectan y se pueden procesar.
+
+| Selección por área | Ayuda para bloques sin descarga directa |
+| --- | --- |
+| ![Selección por área](docs/mapa-seleccion.jpg) | ![Ayuda del CNIG](docs/mapa-ayuda.jpg) |
+
+### 2. Vista 3D del terreno
+
+- **Suelo (MDT) o Con objetos (MDS)**: terreno desnudo, o con edificios y árboles. En el MDS, los objetos tienen
+  su propia exageración vertical («Objetos ×»), independiente de la del relieve.
+- **Color**: por altura (con escala de colores editable), por pendiente, gris (solo sombreado) u **ortofoto PNOA**
+  del IGN sobre el relieve.
+- **Relieve ×**: exageración vertical libre (se puede escribir cualquier valor, p. ej. 32).
+- **Luz**: dirección del sol para el sombreado.
+- Varios bloques se unen **sin costuras**: los bordes se calculan con los datos del bloque vecino.
+- **Barra de escala** abajo con las alturas reales; doble clic para cambiar colores y rango.
+- **Brújula**: indica el norte; al pulsarla, la vista se orienta al norte.
+
+| Ortofoto sobre el relieve | Con objetos (edificios y árboles) |
+| --- | --- |
+| ![Ortofoto](docs/3d-ortofoto.jpg) | ![Con objetos](docs/3d-objetos.jpg) |
+
+### 3. Curvas de nivel
+
+Lista editable de curvas: **cada N metros** o **a una cota concreta**, cada una con su color, grosor y patrón
+(continua, discontinua, puntos, raya-punto). Botones rápidos para 1, 2, 5, 10 y 25 m con curva maestra.
+
+![Color por pendiente con curvas cada 10 m](docs/3d-pendiente.jpg)
+
+### 4. Nube de puntos
+
+Vista de la nube LiDAR original (formato COPC), cargada por partes según la distancia. Color real (RGB),
+por clase, por altura o por intensidad; filtro por clases (suelo, vegetación, edificios, agua…); calidad y
+tamaño de punto ajustables.
+
+![Nube de puntos en color real](docs/puntos.jpg)
+
+### 5. Modo foto
+
+Oculta la interfaz (se elige qué se queda: brújula, escala, atribución…) para hacer capturas limpias, y
+guarda la vista 3D como PNG. `Esc` para salir.
+
+![Modo foto](docs/modo-foto.jpg)
+
+*Capturas de pantalla: terreno y ortofoto PNOA © IGN / Junta de Castilla y León (CC BY 4.0); mapa base ©
+colaboradores de OpenStreetMap.*
 
 ## Requisitos
 
@@ -56,7 +112,7 @@ servidor.
 Flujo básico:
 
 1. Busca un lugar o navega por el mapa hasta los bloques de 2 km.
-2. Selecciona bloques (clic o rectángulo) y pulsa **Descargar**. La app descarga y genera el terreno.
+2. Selecciona bloques (clic o rectángulo) y pulsa **Descargar y procesar**. La app descarga y genera el terreno.
 3. Pulsa el nivel **3D** para verlos en relieve.
 
 Procesado manual (por ejemplo, con LAZ del CNIG):
@@ -118,9 +174,26 @@ uso intensivo o compartido, conviene usar tu propio servidor de teselas o de geo
 - Los lanzadores `.bat` son solo para Windows; en otros sistemas usa `npm run dev`.
 - La interfaz está en castellano.
 
+## Adáptalo a tu región
+
+Mapa LiDAR nació para España, pero casi todo sirve en cualquier sitio con LiDAR abierto: el visor 3D, las curvas
+de nivel, la nube de puntos y el conversor `tools/lidar2mdt.py` funcionan con cualquier LAZ/LAS clasificado en
+coordenadas UTM. Lo que es específico de España es:
+
+- el **catálogo de descargas** (PNOA de Castilla y León, geoEuskadi) y la ayuda del CNIG,
+- la **cuadrícula** del mapa (husos UTM 29–31 y bloques de 2×2 km en ETRS89),
+- la **ortofoto** (WMS del IGN; ya se puede cambiar con `MAPA_LIDAR_WMS_ORTO`),
+- y la **interfaz**, que está en castellano.
+
+**Si en tu país o región hay LiDAR público y te apetece añadirlo, ¡bienvenido!** Otra comunidad autónoma, otro
+país con datos abiertos (muchos los publican) o una traducción de la interfaz: todo suma. En
+[CONTRIBUTING.md](CONTRIBUTING.md) se explica dónde está cada pieza y cómo añadir una fuente nueva. Abre un
+*issue* contando qué datos quieres añadir y lo vemos juntos.
+
 ## Contribuir
 
-Se aceptan *issues* y *pull requests*. Ejecuta `npm test` antes de enviar cambios.
+Se aceptan *issues* y *pull requests*; la guía está en [CONTRIBUTING.md](CONTRIBUTING.md). Ejecuta `npm test`
+antes de enviar cambios.
 
 ## Licencia
 

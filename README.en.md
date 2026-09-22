@@ -14,20 +14,77 @@ an orthophoto on top. Everything runs on your own computer: no external server a
 > geoEuskadi downloads) have seen little testing; see [Limitations](#limitations).
 > The user interface is in Spanish.
 
-## Features
+> **Want it for your country or region?** See [Adapt it to your region](#adapt-it-to-your-region).
 
-- **Selection map** (OpenStreetMap) with a hierarchical UTM grid: peninsula → 100 km cells → 10 km cells →
-  2 km blocks. Each block shows its state: ready, partial, downloaded but not processed, downloadable, no direct
-  link, or no data.
-- **Place search** (Nominatim), rectangle selection with a block table, and blocks from neighbouring cells.
-- **Automatic download and processing** where a public direct link exists (Castilla y León, geoEuskadi).
-  Elsewhere, step-by-step help for the CNIG download centre; LAZ files you save to *Downloads* are detected.
-- **3D terrain view**: DTM (ground) or DSM (with buildings and vegetation), per-pixel hillshade, color by
-  height, slope, grey or **PNOA orthophoto**, free vertical exaggeration (and a separate one for objects),
-  seamless joins between blocks.
-- Configurable **contour lines** (interval or specific elevation, color, width, pattern).
-- Compass, editable color scale bar (double-click) and **photo mode** (hides the UI, exports PNG).
-- **Point cloud** view (COPC) with on-demand loading and class filtering.
+## What it can do
+
+### 1. Selection map
+
+The app opens on an OpenStreetMap map with the official UTM grid of LiDAR blocks. You drill down through
+levels, like layers: **Peninsula** (UTM zones and 100 km squares) → **100 km** (10 km cells) → **10 km**
+(2×2 km blocks) → **3D** (terrain of the chosen blocks). Arrows in the level selector move up and down, with
+animated zoom between levels.
+
+| Peninsula and cells | 2 km blocks |
+| --- | --- |
+| ![Peninsula level](docs/mapa-peninsula.jpg) | ![Block level](docs/mapa-bloques.jpg) |
+
+- **Per-block state** shown by color: terrain ready, partial, downloaded but not processed, downloadable, in the
+  catalogue but link unavailable, or no automatic download.
+- **Place search** (Nominatim): centres the map and drops a marker.
+- **Neighbouring cells**: at the 10 km level the surrounding blocks are shown too (greyed) and can be selected;
+  arrows on the edges jump to the adjacent cell.
+- **Area selection**: draw a rectangle to get a table of every block inside, its state and what to do with it
+  (download, process, view in 3D, or how to get it).
+- **Automatic download and processing** where a public direct link exists (Castilla y León and geoEuskadi): the
+  app downloads the LAZ files, turns them into terrain with Python and marks them ready. A job queue shows progress.
+- **Rest of Spain**: for each block, help with the link to the CNIG download centre, the coordinates to find it
+  and the steps. LAZ files you save to your *Downloads* folder are detected and can be processed.
+
+| Area selection | Help for blocks without direct download |
+| --- | --- |
+| ![Area selection](docs/mapa-seleccion.jpg) | ![CNIG help](docs/mapa-ayuda.jpg) |
+
+### 2. 3D terrain view
+
+- **Ground (DTM) or With objects (DSM)**: bare terrain, or with buildings and trees. In the DSM, objects have
+  their own vertical exaggeration ("Objetos ×"), separate from the relief's.
+- **Color**: by height (with an editable color scale), by slope, grey (shading only) or **PNOA orthophoto** from
+  IGN draped over the relief.
+- **Relief ×**: free vertical exaggeration (type any value, e.g. 32).
+- **Light**: sun direction for the hillshade.
+- Several blocks join **seamlessly**: edges are computed with the neighbouring block's data.
+- **Scale bar** at the bottom with real heights; double-click to change colors and range.
+- **Compass**: shows north; click it to turn the view to north.
+
+| Orthophoto over the relief | With objects (buildings and trees) |
+| --- | --- |
+| ![Orthophoto](docs/3d-ortofoto.jpg) | ![With objects](docs/3d-objetos.jpg) |
+
+### 3. Contour lines
+
+Editable list of contours: **every N metres** or **at a specific elevation**, each with its own color, width
+and pattern (solid, dashed, dotted, dash-dot). Quick buttons for 1, 2, 5, 10 and 25 m with index contours.
+
+![Slope coloring with 10 m contours](docs/3d-pendiente.jpg)
+
+### 4. Point cloud
+
+View of the original LiDAR point cloud (COPC format), loaded in parts by distance. Real color (RGB), by
+class, by height or by intensity; class filter (ground, vegetation, buildings, water…); adjustable quality and
+point size.
+
+![Point cloud in real color](docs/puntos.jpg)
+
+### 5. Photo mode
+
+Hides the interface (you choose what stays: compass, scale, attribution…) for clean screenshots, and saves the
+3D view as PNG. `Esc` to exit.
+
+![Photo mode](docs/modo-foto.jpg)
+
+*Screenshots: PNOA terrain and orthophoto © IGN / Junta de Castilla y León (CC BY 4.0); base map ©
+OpenStreetMap contributors.*
 
 ## Requirements
 
@@ -56,7 +113,7 @@ stops the server.
 Basic workflow:
 
 1. Search for a place or zoom the map down to the 2 km blocks.
-2. Select blocks (click or rectangle) and press **Descargar** (download). The app downloads and builds the terrain.
+2. Select blocks (click or rectangle) and press **Descargar y procesar** (download and process). The app downloads and builds the terrain.
 3. Press the **3D** level to view them in relief.
 
 Manual processing (e.g. LAZ files from CNIG):
@@ -117,9 +174,26 @@ own tile or geocoding server.
 - Converting a 25–40 M point block to COPC may need 3–4 GB of RAM.
 - The `.bat` launchers are Windows-only; elsewhere use `npm run dev`.
 
+## Adapt it to your region
+
+Mapa LiDAR was built for Spain, but most of it works anywhere with open LiDAR: the 3D viewer, contour lines,
+point cloud view and the `tools/lidar2mdt.py` converter work with any classified LAZ/LAS file in UTM
+coordinates. What is Spain-specific:
+
+- the **download catalogue** (PNOA Castilla y León, geoEuskadi) and the CNIG help,
+- the map **grid** (UTM zones 29–31 and 2×2 km blocks in ETRS89),
+- the **orthophoto** (IGN WMS; already configurable with `MAPA_LIDAR_WMS_ORTO`),
+- and the **user interface**, which is in Spanish.
+
+**If your country or region publishes LiDAR openly and you'd like to add it, you're very welcome!** Another
+region of Spain, another country with open data (many publish it), or a translation of the interface: it all
+helps. [CONTRIBUTING.md](CONTRIBUTING.md) explains where each piece lives and how to add a new source. Open an
+issue describing the data you'd like to add and we'll work it out together.
+
 ## Contributing
 
-Issues and pull requests are welcome. Run `npm test` before submitting changes.
+Issues and pull requests are welcome; the guide is in [CONTRIBUTING.md](CONTRIBUTING.md). Run `npm test` before
+submitting changes.
 
 ## Licence
 
