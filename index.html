@@ -30,6 +30,15 @@
       <button id="btn-bajar" class="solo-3d" title="Ver más de lado">&#x25BC;</button>
       <span class="sep solo-3d"></span>
       <button id="btn-encuadrar" class="solo-3d" title="Encuadrar la zona">&#x2922;</button>
+      <button id="btn-punto" class="solo-3d" title="Inspeccionar un punto: coordenadas, altura y pendiente" aria-label="Inspeccionar un punto">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 21s-6.5-6.1-6.5-11A6.5 6.5 0 0 1 18.5 10c0 4.9-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" fill="currentColor"/></svg>
+      </button>
+      <button id="btn-canal" class="solo-3d" title="Canal por gravedad: trazar un acueducto desde un manantial" aria-label="Canal por gravedad">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M2 6h20M3 6v14M21 6v14M3 11h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 20v-3a3 3 0 0 1 6 0v3M12 20v-3a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <button id="btn-manantiales" title="Manantiales conocidos (IGME y OpenStreetMap)" aria-label="Manantiales">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3c3 4.2 6 7.6 6 11a6 6 0 0 1-12 0c0-3.4 3-6.8 6-11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.2 14.5a2.8 2.8 0 0 0 2.8 2.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
       <span class="sep"></span>
       <button id="btn-foto" title="Modo foto: ocultar la interfaz para una captura (Esc para salir)" aria-label="Modo foto">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
@@ -46,9 +55,12 @@
       <div id="lista-zonas" class="cuerpo" hidden></div>
     </aside>
 
-    <aside class="panel vidrio der" aria-label="Visualización">
-      <div class="cab"><b>Visualización</b></div>
-      <div class="cuerpo">
+    <aside class="panel vidrio der" aria-label="Visualización y herramientas">
+      <div class="seg pest pest-der">
+        <button data-pd="vista" class="a">Vista</button>
+        <button data-pd="canal">Canal</button>
+      </div>
+      <div id="cuerpo-vista" class="cuerpo">
         <div class="ctl"><label>Vista</label>
           <div class="seg" data-seg="vista">
             <button data-valor="terreno" class="a">Terreno</button>
@@ -117,6 +129,7 @@
           <div id="clases" class="clases"></div>
         </div>
       </div>
+      <div id="panel-canal" class="cuerpo panel-canal" aria-label="Canal por gravedad" hidden></div>
     </aside>
 
     <aside id="panel-mapa" class="panel vidrio der mapa" aria-label="Elegir zona" hidden></aside>
@@ -124,6 +137,9 @@
     <div id="escala" class="escala vidrio" hidden></div>
     <section id="editor-escala" class="editor-escala vidrio" hidden></section>
     <section id="dialogo-foto" class="dialogo-foto vidrio" hidden></section>
+    <section id="tarjeta-punto" class="tarjeta-punto vidrio" aria-label="Datos del punto" hidden></section>
+    <section id="tarjeta-manantial" class="tarjeta-punto vidrio" aria-label="Datos del manantial" hidden></section>
+    <div id="leyenda-manantiales" class="leyenda-manantiales vidrio" hidden></div>
     <button id="brujula" class="brujula vidrio" type="button" aria-label="Brújula: orientar al norte"></button>
 
     <footer class="tele vidrio" id="telemetria">Sin bloques cargados</footer>

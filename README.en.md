@@ -4,14 +4,15 @@
 
 A local LiDAR terrain viewer for Spain. Pick 2×2 km blocks on a map; the app downloads and processes the
 available PNOA-LiDAR data and shows it in 3D as a shaded relief, with contour lines, an editable color scale or
-an orthophoto on top. Everything runs on your own computer: no external server and no account.
+an orthophoto on top. It also includes tools to inspect terrain points and to study where a gravity canal (aqueduct)
+could carry water. Everything runs on your own computer: no external server and no account.
 
 ![3D terrain view](docs/captura.jpg)
 
 *1 m terrain over 6×6 km (9 PNOA blocks), colored by height, ×2.5 relief and 10 m contours. Data: PNOA-LiDAR 2021 © IGN / Junta de Castilla y León (CC BY 4.0).*
 
-> Status: **v0.3, experimental.** Mostly used on Windows. Some parts (orthophoto from the real IGN WMS,
-> geoEuskadi downloads) have seen little testing; see [Limitations](#limitations).
+> Status: **v0.4, experimental.** Mostly used on Windows. Some parts (automatic geoEuskadi
+> downloads) have seen little testing; see [Limitations](#limitations).
 > The user interface is in Spanish.
 
 > **Want it for your country or region?** See [Adapt it to your region](#adapt-it-to-your-region).
@@ -76,7 +77,53 @@ point size.
 
 ![Point cloud in real color](docs/puntos.jpg)
 
-### 5. Photo mode
+### 5. Point inspector
+
+With the pin button, every click on the terrain shows the coordinates (UTM and latitude/longitude, with copy
+buttons), the ground elevation, the surface elevation when "Con objetos" is on, and the slope.
+
+![Terrain point details](docs/punto.jpg)
+
+### 6. Gravity canal: aqueducts
+
+A tool to study where water could be taken from a spring, the way Roman engineers did. Everything is computed on
+the LiDAR DTM.
+
+- **Spring only:** traces, to both sides of the hillside, the canal that keeps descending at a constant gradient
+  while hugging the terrain, going around every gully.
+- **Spring, waypoints and destination:** the route is built **in legs**. Each leg starts at the elevation where the
+  previous one arrived and can be a **canal** or a **siphon**.
+- **Alternative routes:** on canal legs up to three routes are searched (least work, balanced, most direct) with a
+  least-cost path search, like a map navigator, except the cost is construction work instead of time. You pick one
+  and the rest of the route is recomputed.
+- **Work shown by color:** blue along the hillside, red where a bridge or embankment would be needed, orange where a
+  deep cut or tunnel would, purple for drops, and teal for siphons.
+- **Siphon suggestions:** if a route needs a bridge taller than a set threshold (50 m by default), the app flags it
+  and, if you accept, turns that stretch into a siphon and recomputes what follows. The decision is yours.
+- **Per-leg figures:** length, drop, average gradient, metres of work and maximum height; for siphons, depth and
+  approximate pressure as well.
+- **Adjustable parameters:** minimum and maximum gradient, tolerance, siphon threshold and siphon head loss.
+
+![Multi-leg route with a siphon](docs/canal.jpg)
+
+> The default values (gradients, bridge threshold, siphon head loss) are reasonable starting points, not historical
+> data: check them against your own sources. The route is an **approximation**: the canal elevation depends on the
+> path taken, so the search does not guarantee the exact optimum.
+
+### 7. Known springs
+
+Optional layer with inventoried springs, on the map (10 km level) and in 3D:
+
+- **IGME** water points database: place name, elevation, reference flow and municipality.
+- **OpenStreetMap** nodes tagged `natural=spring`.
+
+Clicking one shows its data, compares the source elevation with the LiDAR one, and lets you use it directly as the
+canal's spring. Queries are cached in `data/manantiales`.
+
+![Springs over the terrain](docs/manantiales.jpg)
+
+
+### 8. Photo mode
 
 Hides the interface (you choose what stays: compass, scale, attribution…) for clean screenshots, and saves the
 3D view as PNG. `Esc` to exit.
@@ -160,7 +207,8 @@ data have their own licences and terms; check them before redistributing anythin
 | [geoEuskadi](https://www.geo.euskadi.eus/) (Basque Government) | Direct tile downloads (licence not confirmed) |
 | [CNIG download centre](https://centrodedescargas.cnig.es/) | Rest of Spain (manual download) |
 | PNOA orthophoto, IGN WMS (`www.ign.es/wms-inspire/pnoa-ma`) | "Foto" texture; CC BY 4.0, scne.es |
-| © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) | Base map (ODbL) and search (Nominatim) |
+| [IGME water points database](https://info.igme.es/catalogo/resource.aspx?portal=1&catalog=3&ctt=1&lang=spa&master=infoigme&resource=38) | Springs layer (check their terms of use) |
+| © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright) | Base map, search (Nominatim) and `natural=spring` springs (ODbL) |
 
 Public services: the base map uses the OpenStreetMap tile servers and search uses Nominatim, both under
 fair-use policies (the app limits search to 1 request/s and caches results). For heavy or shared use, run your
@@ -172,6 +220,9 @@ own tile or geocoding server.
   the official list returned 403 when last tested; CNIG offers no documented public API.
 - Orthophoto from the real IGN WMS and geoEuskadi downloads: lightly tested.
 - Converting a 25–40 M point block to COPC may need 3–4 GB of RAM.
+- Canal routes are approximations, not guaranteed optima, and the historical parameters (gradients, siphons) are
+  assumptions worth checking against your own sources.
+- The springs layer depends on third-party public services: if they are down, the app says so.
 - The `.bat` launchers are Windows-only; elsewhere use `npm run dev`.
 
 ## Adapt it to your region

@@ -1,3 +1,7 @@
+import { montarCanal } from './ui/canal.js';
+import { montarPunto } from './ui/punto.js';
+import { montarManantiales } from './ui/manantiales.js';
+import { instalarClics } from './viewer/picar.js';
 import { Escena } from './viewer/escena.js';
 import { pintarZonas, pintarClases, botonRepetible } from './ui/panel.js';
 import { uniformesTerreno, fijarLuz } from './viewer/capaTerreno.js';
@@ -373,6 +377,31 @@ const brujula = montarBrujula(document.getElementById('brujula'), escena);
   requestAnimationFrame(bucleHud);
 })();
 
+// ---------------------------------------------------------------- herramientas sobre el terreno
+instalarClics(escena, avisar);
+const punto = montarPunto({
+  boton: document.getElementById('btn-punto'),
+  tarjeta: document.getElementById('tarjeta-punto'),
+  escena,
+  avisar,
+});
+const canal = montarCanal({
+  boton: document.getElementById('btn-canal'),
+  panel: document.getElementById('panel-canal'),
+  escena,
+  avisar,
+});
+
+const manantiales = montarManantiales({
+  boton: document.getElementById('btn-manantiales'),
+  leyenda: document.getElementById('leyenda-manantiales'),
+  tarjeta: document.getElementById('tarjeta-manantial'),
+  mapa,
+  escena,
+  canal,
+  avisar,
+});
+
 // ---------------------------------------------------------------- modo foto
 montarModoFoto({
   boton: document.getElementById('btn-foto'),
@@ -399,4 +428,4 @@ montarModoFoto({
 cargarZonas();
 ponerModo('mapa');
 mapa.irA({ tipo: 'peninsula' });
-window.__mapaLidar = { escena, estado, mapa };
+window.__mapaLidar = { escena, estado, mapa, canal, punto, manantiales };

@@ -579,6 +579,7 @@ export class MapaSelector {
     else if (n.tipo === 'celda100') this.dibujarCelda100(n);
     else this.dibujarCelda10(n);
     this.dibujarArea();
+    for (const c of this.capasExtra || []) c.dibujar(this);
     this.dibujarMarca();
     this.zonasClic.push(...this.zonasClicFinal);
     if (this.rectPantalla) {

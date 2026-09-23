@@ -132,7 +132,7 @@ export function crearMiddleware({ raiz, servicio } = {}) {
   return (req, res, next) => {
     const url = new URL(req.url || '/', 'http://localhost');
     const base = raiz || carpetaDatos();
-    if (servicio && /^\/api\/(mapa|sistema|buscar|orto)(\/|$)/.test(url.pathname)) {
+    if (servicio && /^\/api\/(mapa|sistema|buscar|orto|manantiales)(\/|$)/.test(url.pathname)) {
       Promise.resolve(servicio.manejar(req, res, url))
         .then((hecho) => {
           if (hecho === false) next();

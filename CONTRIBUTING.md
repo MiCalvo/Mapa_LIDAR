@@ -28,6 +28,11 @@ right now is **adding LiDAR sources for other regions and countries**.
 | Orthophoto WMS | `server/servicio.js` → `servirOrto` | URL via `MAPA_LIDAR_WMS_ORTO`; layer `OI.OrthoimageCoverage` and CRS `EPSG:258<zone>` (ETRS89 / UTM) are hard-coded |
 | Terrain grids from LAZ | `tools/lidar2mdt.py` | Generic: uses ASPRS classes (2 ground, 9 water; 7/18 noise). Works with any classified LAZ/LAS in UTM |
 | 3D viewer and shaders | `src/viewer/` | |
+| Gravity canal: contour-following trace | `src/analisis/canal.js` | Pure functions, no three.js |
+| Gravity canal: route search and siphons | `src/analisis/ruta.js` (+ `ruta.worker.js`) | A* on a grid; cost = work |
+| Canal UI (legs, options, suggestions) | `src/ui/canal.js` | |
+| Springs layer (IGME, OpenStreetMap) | `server/manantiales.js`, `src/ui/manantiales.js` | Cached per 0.1° tile in `data/manantiales` |
+| Terrain sampling, picking, active tool | `src/viewer/picar.js` | Shared by the canal and the point inspector |
 
 ### Adding a new LiDAR source (current, manual way)
 

@@ -1,9 +1,9 @@
 {
   "name": "mapa-lidar",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
-  "description": "Visor local de terreno LiDAR (MDT/MDS sombreado, curvas de nivel, ortofoto y nube de puntos COPC) con mapa de selección y descarga de bloques PNOA",
+  "description": "Visor local de terreno LiDAR (MDT/MDS sombreado, curvas de nivel, ortofoto y nube de puntos COPC) con mapa de selección, descarga de bloques PNOA y trazado de canales por gravedad (acueductos)",
   "license": "MIT",
   "keywords": [
     "lidar",
@@ -14,7 +14,9 @@
     "hillshade",
     "three.js",
     "spain",
-    "utm"
+    "utm",
+    "aqueduct",
+    "acueducto"
   ],
   "scripts": {
     "dev": "vite",

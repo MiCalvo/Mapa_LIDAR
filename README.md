@@ -4,14 +4,15 @@
 
 Visor local de terreno LiDAR para España. Eliges bloques de 2×2 km sobre un mapa, la app descarga y procesa
 los datos PNOA-LiDAR que haya disponibles y los muestra en 3D como relieve sombreado, con curvas de nivel,
-escala de color editable u ortofoto encima. Todo corre en tu ordenador: no hay servidor externo ni cuenta.
+escala de color editable u ortofoto encima. Incluye herramientas para medir puntos del terreno y para estudiar por
+dónde llevaría el agua un canal por gravedad (acueductos). Todo corre en tu ordenador: no hay servidor externo ni cuenta.
 
 ![Vista 3D del terreno](docs/captura.jpg)
 
 *Terreno a 1 m de 6×6 km (9 bloques PNOA) con color por altura, relieve ×2,5 y curvas cada 10 m. Datos: PNOA-LiDAR 2021 © IGN / Junta de Castilla y León (CC BY 4.0).*
 
-> Estado: **v0.3, experimental.** Se ha usado sobre todo en Windows. Algunas partes (ortofoto con el WMS real
-> del IGN, descarga de geoEuskadi) se han probado poco; ver [Limitaciones](#limitaciones).
+> Estado: **v0.4, experimental.** Se ha usado sobre todo en Windows. Algunas partes (la descarga
+> automática de geoEuskadi) se han probado poco; ver [Limitaciones](#limitaciones).
 
 > **¿Quieres usarlo en tu país o región?** Ver [Adáptalo a tu región](#adáptalo-a-tu-región).
 
@@ -75,7 +76,53 @@ tamaño de punto ajustables.
 
 ![Nube de puntos en color real](docs/puntos.jpg)
 
-### 5. Modo foto
+### 5. Inspeccionar un punto
+
+Con la chincheta de la barra, cada clic en el terreno muestra las coordenadas (UTM y latitud/longitud, con botones
+para copiarlas), la altura del suelo, la de los objetos si está activado «Con objetos» y la pendiente.
+
+![Datos de un punto del terreno](docs/punto.jpg)
+
+### 6. Canal por gravedad: acueductos
+
+Herramienta pensada para estudiar por dónde podría llevarse el agua desde un manantial, como hacían los ingenieros
+romanos. Todo se calcula sobre el MDT del LiDAR.
+
+- **Solo manantial:** traza hacia los dos lados de la ladera el canal que baja siempre la misma pendiente y se ciñe
+  al terreno, rodeando cada vaguada.
+- **Manantial, puntos intermedios y destino:** el recorrido se hace **por tramos**. Cada tramo empieza a la cota a la
+  que llegó el anterior y puede ser **canal** o **sifón**.
+- **Rutas alternativas:** en los tramos de canal se buscan hasta tres trazados (menos obra, equilibrada, más directa)
+  con una búsqueda de camino de menor coste, como un navegador de mapas, pero pagando por la obra en vez de por el
+  tiempo. Se elige uno y el resto del recorrido se recalcula.
+- **Obra marcada por colores:** azul por la ladera, rojo donde haría falta puente o terraplén, naranja donde haría
+  falta zanja o túnel, morado los resaltos (caídas bruscas) y verde azulado los sifones.
+- **Sugerencias de sifón:** si una ruta necesita un puente más alto de lo razonable (50 m por defecto), la app lo
+  señala y, si aceptas, convierte ese tramo en sifón y recalcula lo que viene después. La decisión es tuya.
+- **Datos de cada tramo:** longitud, desnivel, pendiente media, metros de obra y altura máxima; en los sifones,
+  además, profundidad y presión aproximada.
+- **Parámetros ajustables:** pendiente mínima y máxima, tolerancia, umbral de sifón y pérdida de carga del sifón.
+
+![Recorrido por tramos con un sifón](docs/canal.jpg)
+
+> Los valores por defecto (pendientes, umbral de puente, pérdida en el sifón) son puntos de partida razonables, no
+> datos históricos: contrástalos con tus fuentes. El trazado es una **aproximación**: la cota del canal depende del
+> camino recorrido, así que la búsqueda no garantiza el óptimo exacto.
+
+### 7. Manantiales conocidos
+
+Capa opcional con los manantiales inventariados, en el mapa (nivel de 10 km) y en 3D:
+
+- **IGME**, Base de datos de Puntos de Agua: topónimo, cota, caudal de referencia y municipio.
+- **OpenStreetMap**, puntos etiquetados como `natural=spring`.
+
+Al tocar uno se ven sus datos, se compara la cota de la fuente con la del LiDAR y se puede usar directamente como
+manantial del canal. Las consultas se guardan en caché en `data/manantiales`.
+
+![Manantiales sobre el terreno](docs/manantiales.jpg)
+
+
+### 8. Modo foto
 
 Oculta la interfaz (se elige qué se queda: brújula, escala, atribución…) para hacer capturas limpias, y
 guarda la vista 3D como PNG. `Esc` para salir.
@@ -159,7 +206,8 @@ tienen sus propias licencias y condiciones; revísalas antes de redistribuir nad
 | [geoEuskadi](https://www.geo.euskadi.eus/) (Gobierno Vasco) | Descarga directa de teselas (licencia sin confirmar) |
 | [Centro de Descargas del CNIG](https://centrodedescargas.cnig.es/) | Resto de España (descarga manual) |
 | Ortofoto PNOA, WMS del IGN (`www.ign.es/wms-inspire/pnoa-ma`) | Textura «Foto»; CC BY 4.0, scne.es |
-| © [colaboradores de OpenStreetMap](https://www.openstreetmap.org/copyright) | Mapa base (ODbL) y búsqueda (Nominatim) |
+| [Base de datos de Puntos de Agua del IGME](https://info.igme.es/catalogo/resource.aspx?portal=1&catalog=3&ctt=1&lang=spa&master=infoigme&resource=38) | Capa de manantiales (consultar sus condiciones de uso) |
+| © [colaboradores de OpenStreetMap](https://www.openstreetmap.org/copyright) | Mapa base, búsqueda (Nominatim) y manantiales `natural=spring` (ODbL) |
 
 Uso de servicios públicos: el mapa base usa los servidores de teselas de OpenStreetMap y la búsqueda usa
 Nominatim, ambos con políticas de uso justo (la app limita la búsqueda a 1 petición/s y guarda caché). Para un
@@ -172,6 +220,9 @@ uso intensivo o compartido, conviene usar tu propio servidor de teselas o de geo
 - Ortofoto con el WMS real del IGN y descarga de geoEuskadi: poco probadas.
 - Convertir a COPC un bloque de 25–40 M puntos puede necesitar 3–4 GB de RAM.
 - Los lanzadores `.bat` son solo para Windows; en otros sistemas usa `npm run dev`.
+- Las rutas de canal son aproximaciones, no óptimos garantizados, y los parámetros históricos (pendientes, sifones)
+  son supuestos que conviene contrastar.
+- La capa de manantiales depende de servicios públicos ajenos: si no responden, se avisa en pantalla.
 - La interfaz está en castellano.
 
 ## Adáptalo a tu región

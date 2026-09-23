@@ -29,6 +29,8 @@ import {
   resumen,
 } from './catalogo.js';
 
+import { crearManantiales } from './manantiales.js';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIAS_CACHE = 30;
 
@@ -39,6 +41,7 @@ export function crearServicio({ raiz = ROOT, zonas, descargar = true } = {}) {
     catalogos: path.join(raiz, 'data', 'catalogos'),
     herramienta: path.join(raiz, 'tools', 'lidar2mdt.py'),
     ortofotos: path.join(raiz, 'data', 'ortofotos'),
+    manantiales: path.join(raiz, 'data', 'manantiales'),
     // LAZ bajados a mano (CNIG…) que siguen en la carpeta de Descargas: se detectan sin moverlos.
     extra: descargar
       ? ['Downloads', 'Descargas']
@@ -541,6 +544,7 @@ export function crearServicio({ raiz = ROOT, zonas, descargar = true } = {}) {
     });
   }
 
+  let manantiales = null;
   async function manejar(req, res, url) {
     const ruta = url.pathname;
     if (ruta === '/api/mapa/resumen') {
@@ -583,6 +587,18 @@ export function crearServicio({ raiz = ROOT, zonas, descargar = true } = {}) {
     }
     if (ruta === '/api/orto') {
       return servirOrto(res, url);
+    }
+    if (ruta === '/api/manantiales') {
+      const q = (k) => Number(url.searchParams.get(k));
+      const fuente = url.searchParams.get('fuente') === 'osm' ? 'osm' : 'igme';
+      const [s, w, n, e] = ['s', 'w', 'n', 'e'].map(q);
+      if (![s, w, n, e].every(Number.isFinite) || s >= n || w >= e) return json(res, 400, { error: 's, w, n, e' });
+      try {
+        manantiales ??= crearManantiales({ dir: dirs.manantiales });
+        return json(res, 200, { fuente, ...(await manantiales.buscar(fuente, s, w, n, e)) });
+      } catch (error) {
+        return json(res, 502, { fuente, error: String(error?.message || error) });
+      }
     }
     if (ruta === '/api/buscar') {
       const texto = String(url.searchParams.get('q') || '').trim().slice(0, 100);
